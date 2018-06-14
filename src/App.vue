@@ -5,10 +5,9 @@
     <template v-if="repos">
       <h1>{{ vueHasPassedReact ? 'YES' : 'NO' }}</h1>
       <p>
-        <small
-          v-if="!vueHasPassedReact">
-            Only {{ reactStars - vueStars | formatNumber }} stars away!
-          </small>
+        <small v-if="!vueHasPassedReact">
+          Only {{ reactStars - vueStars | formatNumber }} stars away!
+        </small>
       </p>
       <ul>
         <li>
@@ -36,31 +35,7 @@ import axios from 'axios'
 import GithubCorner from './components/GithubCorner'
 import { VueIcon, ReactIcon, StarIcon } from './components/icons'
 
-const query = `
-  query {
-    react: repository(owner: "facebook", name: "react") {
-      url
-      stargazers(first: 1) {
-        totalCount
-      }
-    }
-    vue: repository(owner: "vuejs", name: "vue") {
-      url
-      stargazers(first:1) {
-        totalCount
-      }
-    }
-  }
-`
-
-const TOKEN = ['7594db13c793111b2b', 'fa651c318a93de5b8869e1']
-
-const github = axios.create({
-  baseURL: 'https://api.github.com',
-  headers: {
-    'Authorization': `Bearer ${TOKEN.join('')}`
-  }
-})
+const FUNCTIONS_ENDPOINT = 'https://wt-13e53fa81a1f88b8fd161c9e57aeaac4-0.sandbox.auth0-extend.com/fetchGithubStars'
 
 export default {
   name: 'App',
@@ -105,7 +80,7 @@ export default {
   methods: {
     async fetchRepos() {
       try {
-        const { data: res } = await github.post('graphql', { query })
+        const { data: res } = await axios.get(FUNCTIONS_ENDPOINT)
         this.repos = res.data
       } catch (err) {
         console.log(err)
@@ -130,12 +105,15 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
   text-align: center;
   color: #333;
+  background: #efefef;
 }
 
 #app {
   width: 300px;
-  border: 1px solid #eeeeee;
+  border: 1px solid #dddddd;
   border-radius: 4px;
+  background: #ffffff;
+  box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07);
 }
 
 h1 {
@@ -159,7 +137,7 @@ li a {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-top: 1px solid #eeeeee;
+  border-top: 1px solid #dddddd;
   padding: 10px;
   text-decoration: none;
   color: #333;
@@ -179,7 +157,7 @@ li a > * {
 }
 
 li:last-of-type {
-  border-left: 1px solid #eeeeee;
+  border-left: 1px solid #dddddd;
 }
 
 </style>
