@@ -130,7 +130,7 @@ ul {
 li {
   list-style-type: none;
   flex: 1;
-  
+
 }
 
 li a {
