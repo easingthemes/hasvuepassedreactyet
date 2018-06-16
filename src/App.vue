@@ -3,10 +3,11 @@
     <github-corner/>
     <p>Has Vue passed React yet?</p>
     <template v-if="repos">
-      <h1>{{ vueHasPassedReact ? 'YES' : 'NO' }}</h1>
+      <h1 :class="{ pad: vueHasPassedReact }" v-if="!tie">{{ vueHasPassedReact ? 'YES' : 'NO' }}</h1>
+      <h1 :class="{ pad: vueHasPassedReact }" v-else>TIE!</h1>
       <p>
-        <small v-if="!vueHasPassedReact">
-          Only {{ reactStars - vueStars | formatNumber }} stars away!
+        <small v-if="!vueHasPassedReact && !tie" class="away">
+          Only {{ reactStars - vueStars | formatNumber }} {{ reactStars - vueStars === 1 ? 'star' : 'stars'}} away!
         </small>
       </p>
       <ul>
@@ -25,6 +26,16 @@
           </a>
         </li>
       </ul>
+      <span class="reload" :class="{ reloading }" @click="reload">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="#333333" d="M19 8l-4 4h3c0 3.31-2.69 6-6 6a5.87 5.87 0 0 1-2.8-.7l-1.46 1.46A7.93 7.93 0 0 0 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46A7.93 7.93 0 0 0 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>
+      </span>
+    </template>
+    <template v-else-if="error">
+      <h1 class="error">Error</h1>
+      <p>
+        Couldn't retrieve any data.
+        The API rate limits might have kicked in. Just wait a bit and try again.
+      </p>
     </template>
     <p v-else>Loading...</p>
   </div>
@@ -42,7 +53,9 @@ export default {
 
   data() {
     return {
-      repos: null
+      repos: null,
+      error: false,
+      reloading: false
     }
   },
 
@@ -68,6 +81,9 @@ export default {
 
     reactStars() {
       return this.repos.react.stargazers.totalCount
+    },
+    tie() {
+      return this.vueStars === this.reactStars
     }
   },
 
@@ -81,16 +97,45 @@ export default {
     async fetchRepos() {
       try {
         const { data: res } = await axios.get(FUNCTIONS_ENDPOINT)
-        this.repos = res.data
+        if (res.errors && res.errors.length) {
+          this.error = true
+          this.repos = null
+          // eslint-disable-next-line
+          console.log(res.errors)
+        } else {
+          this.error = true
+          this.repos = res.data
+        }
       } catch (err) {
+        // eslint-disable-next-line
         console.log(err)
       }
+    },
+
+    async reload() {
+      if (this.reloading) return
+      this.reloading = true
+      await this.fetchRepos()
+      setTimeout(() => {
+        this.reloading = false
+      }, 900)
     }
   }
 }
 </script>
 
 <style>
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(0,0,0,0);
+}
+::-moz-selection {
+  background: rgba(0,0,0,0);
+}
 
 html, body {
   height: 100%;
@@ -114,6 +159,8 @@ body {
   border-radius: 4px;
   background: #ffffff;
   box-shadow: 0 15px 35px rgba(50,50,93,.1), 0 5px 15px rgba(0,0,0,.07);
+  overflow: hidden;
+  position: relative;
 }
 
 h1 {
@@ -130,7 +177,6 @@ ul {
 li {
   list-style-type: none;
   flex: 1;
-  
 }
 
 li a {
@@ -158,6 +204,58 @@ li a > * {
 
 li:last-of-type {
   border-left: 1px solid #dddddd;
+}
+
+h1.error {
+  font-size: 2em;
+}
+
+h1.pad {
+  margin-bottom: 30px;
+}
+
+p {
+  padding: 0 1em;
+}
+
+.away {
+  display: block;
+  margin-bottom: 40px;
+}
+
+.reload {
+  position: absolute;
+  left: 50%;
+  bottom: 30px;
+  margin-left: -20px;
+  background: #ffffff;
+  width: 40px;
+  height: 40px;
+  text-align: middle;
+  line-height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #dddddd;
+  border-radius: 50%;
+}
+
+.reload:hover {
+  cursor: pointer;
+  background: #eeeeee;
+}
+
+.reloading {
+  animation: rotate 1s infinite ease-in-out;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to { 
+    transform: rotate(-360deg);
+  }
 }
 
 </style>
