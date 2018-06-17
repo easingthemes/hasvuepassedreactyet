@@ -1,43 +1,49 @@
 <template>
   <div id="app">
-    <github-corner/>
-    <p>Has Vue passed React yet?</p>
-    <template v-if="repos">
-      <h1 :class="{ pad: vueHasPassedReact }" v-if="!tie">{{ vueHasPassedReact ? 'YES' : 'NO' }}</h1>
-      <h1 :class="{ pad: vueHasPassedReact }" v-else>TIE!</h1>
-      <p>
-        <small v-if="!vueHasPassedReact && !tie" class="away">
-          Only {{ reactStars - vueStars | formatNumber }} {{ reactStars - vueStars === 1 ? 'star' : 'stars'}} away!
-        </small>
-      </p>
-      <ul>
-        <li>
-          <a :href="repos.vue.url" target="_blank">
-            <vue-icon/>
-            <span>{{ vueStars | formatNumber }}</span>
-            <star-icon/>
-          </a>
-        </li>
-        <li>
-          <a :href="repos.react.url" target="_blank">
-            <react-icon/>
-            <span>{{ reactStars | formatNumber }}</span>
-            <star-icon/>
-          </a>
-        </li>
-      </ul>
-      <span class="reload" :class="{ reloading }" @click="reload">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="#333333" d="M19 8l-4 4h3c0 3.31-2.69 6-6 6a5.87 5.87 0 0 1-2.8-.7l-1.46 1.46A7.93 7.93 0 0 0 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46A7.93 7.93 0 0 0 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>
-      </span>
-    </template>
-    <template v-else-if="error">
-      <h1 class="error">Error</h1>
-      <p>
-        Couldn't retrieve any data.
-        The API rate limits might have kicked in. Just wait a bit and try again.
-      </p>
-    </template>
-    <p v-else>Loading...</p>
+    <div class="app__wrapper">
+      <div class="app__box">
+        <github-corner/>
+        <p>Has Vue passed React yet?</p>
+        <template v-if="repos">
+          <h1 :class="{ pad: vueHasPassedReact }" v-if="!tie">{{ vueHasPassedReact ? 'YES' : 'NO' }}</h1>
+          <h1 :class="{ pad: vueHasPassedReact }" v-else>TIE!</h1>
+          <p>
+            <small v-if="!vueHasPassedReact && !tie" class="away">
+              Only {{ reactStars - vueStars | formatNumber }} {{ reactStars - vueStars === 1 ? 'star' : 'stars'}} away!
+            </small>
+          </p>
+          <ul>
+            <li>
+              <a :href="repos.vue.url" target="_blank">
+                <vue-icon/>
+                <span>{{ vueStars | formatNumber }}</span>
+                <star-icon/>
+              </a>
+            </li>
+            <li>
+              <a :href="repos.react.url" target="_blank">
+                <react-icon/>
+                <span>{{ reactStars | formatNumber }}</span>
+                <star-icon/>
+              </a>
+            </li>
+          </ul>
+          <span class="reload" :class="{ reloading }" @click="reload">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><path fill="#333333" d="M19 8l-4 4h3c0 3.31-2.69 6-6 6a5.87 5.87 0 0 1-2.8-.7l-1.46 1.46A7.93 7.93 0 0 0 12 20c4.42 0 8-3.58 8-8h3l-4-4zM6 12c0-3.31 2.69-6 6-6 1.01 0 1.97.25 2.8.7l1.46-1.46A7.93 7.93 0 0 0 12 4c-4.42 0-8 3.58-8 8H1l4 4 4-4H6z"/><path d="M0 0h24v24H0z" fill="none"/></svg>
+          </span>
+        </template>
+        <template v-else-if="error">
+          <h1 class="error">Error</h1>
+          <p>
+            Couldn't retrieve any data.
+            The API rate limits might have kicked in. Just wait a bit and try again.
+          </p>
+        </template>
+        <p v-else>Loading...</p>
+      </div>
+    </div>
+
+    <diagram></diagram>
   </div>
 </template>
 
@@ -45,6 +51,7 @@
 import axios from 'axios'
 import GithubCorner from './components/GithubCorner'
 import { VueIcon, ReactIcon, StarIcon } from './components/icons'
+import Diagram from './components/diagram/Diagram';
 
 const FUNCTIONS_ENDPOINT = 'https://wt-13e53fa81a1f88b8fd161c9e57aeaac4-0.sandbox.auth0-extend.com/fetchGithubStars'
 
@@ -63,7 +70,8 @@ export default {
     VueIcon,
     ReactIcon,
     StarIcon,
-    GithubCorner
+    GithubCorner,
+    Diagram,
   },
 
   mounted() {
@@ -144,16 +152,19 @@ html, body {
 }
 
 body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-  text-align: center;
   color: #333;
   background: #efefef;
 }
 
-#app {
+.app__wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.app__box {
   width: 300px;
   border: 1px solid #dddddd;
   border-radius: 4px;
@@ -253,9 +264,8 @@ p {
   from {
     transform: rotate(0deg);
   }
-  to { 
+  to {
     transform: rotate(-360deg);
   }
 }
-
 </style>
